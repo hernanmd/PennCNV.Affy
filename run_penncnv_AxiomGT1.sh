@@ -3,7 +3,7 @@
 #
 # Software & Library requirements
 #
-#	Put your .CEL files in a subdirectory of this script directory and edit the cel_files_dir variable below.
+#	Put your .CEL files in a subdirectory of this script directory and edit the ax_cel_dir variable below.
 #	If you are on Windows download and install ActivePerl: https://www.activestate.com/activeperl/downloads (required by PennCNV for Windows)
 # 	Install PennCNV software
 #		git clone https://github.com/WGLab/PennCNV.git
@@ -19,29 +19,56 @@
 # Uncomment to debug this script
 #set -x
 
-prj_prefix=$1
-penncnv_dir='/c/git_projects/PennCNV/affy/bin/'
-PATH=$PATH:$penncnv_dir:/c/Program\ Files/Thermo\ Fisher\ Scientific/Analysis\ Power\ Tools/APT-2.10.0/bin/
+#prj_prefix=$1
+prj_prefix="Run1"
 
-# Default directory for AAS: 'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_GW_Bos_SNP_1.r3'
-cel_files_dir='004/'
-cel_list_file=$(pwd)'cel_files_list.txt'
-results_dir="output/"
-pfb_file="AxiomGT1.pfb"
+# Default directory for AAS: 
+# 	'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_GW_Bos_SNP_1.r3'
+# 	'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_Buffalo_Analysis-r2'
+# 	'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_GW_GT_Chicken_Analysis-r2'
+# 	'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_OviCap_Analysis-caprine-r1'
+# 	'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_MouseHD_Analysis.r1'
 
-ax_library_dir='/c/Users/Public/Documents/AxiomAnalysisSuite/Library/Axiom_GW_Bos_SNP_1.r3/'
+case "$OSTYPE" in
+	linux*|darwin*)
+		penncnv_root="/usr/local/src/PennCNV/"
+		penncnv_axdir=${penncnv_root}"affy/bin/"
+		ax_library_root="/usr/local/src/AxiomAnalysisSuite/Library/"
+		# APT commands should be already available in PATH as indicated in INSTALL file
+		PATH=$PATH:$penncnv_root:$penncnv_axdir
+		;;
+	msys*)
+		penncnv_root="/c/PennCNV/"	
+		penncnv_axdir=${penncnv_root}"affy/bin/"
+		ax_library_root="/c/Users/Public/Documents/AxiomAnalysisSuite/Library/"
+		PATH=$PATH:$penncnv_root:$penncnv_axdir:/c/Program\ Files/Thermo\ Fisher\ Scientific/Analysis\ Power\ Tools/APT-2.10.0/bin/		
+		;;
+	*)
+		echo "unknown: $OSTYPE"
+		exit 1
+		;;			
+esac	
+
+# Directory with .CEL files
+ax_cel_dir='004/'
+ax_cel_file=$(pwd)'cel_files_list.txt'
+ax_results_dir="output/"
+pfb_file=${prj_prefix}"_AxiomGT1.pfb"
+penncnv_hmm1=${penncnv_root}"lib/hhall.hmm"
+
+ax_library_dir=${ax_library_root}"Axiom_GW_Bos_SNP_1.r3/"
 ax_params_file=${ax_library_dir}'Axiom_GW_Bos_SNP_1_96orMore_Step1.r3.apt-probeset-genotype.AxiomGT1.apt2.xml'
 ax_sketch_file=${ax_library_dir}'Axiom_GW_Bos_SNP_1.r3.AxiomGT1.sketch'
 ax_probeset_file=${ax_library_dir}"Axiom_GW_Bos_SNP_1.r3.cdf"
 ax_annot_db==${ax_library_dir}'Axiom_GW_Bos_SNP_1.na35.annot.db'
-ax_report_file=${results_dir}'AxiomGT1.report.txt'
-ax_suite_dir=${results_dir}'suitefiles'
-ax_qnpmpes_file=${results_dir}'quant-norm.pm-only.med-polish.expr.summary.txt'
-ax_calls_file=${results_dir}'AxiomGT1.calls.txt'
-ax_confs_file=${results_dir}'AxiomGT1.confidences.txt'
-genoclust=${results_dir}'AxiomGT1.genocluster'
+ax_report_file=${ax_results_dir}'AxiomGT1.report.txt'
+ax_suite_dir=${ax_results_dir}'suitefiles'
+ax_qnpmpes_file=${ax_results_dir}'quant-norm.pm-only.med-polish.expr.summary.txt'
+ax_calls_file=${ax_results_dir}'AxiomGT1.calls.txt'
+ax_confs_file=${ax_results_dir}'AxiomGT1.confidences.txt'
+genoclust=${ax_results_dir}'AxiomGT1.genocluster'
 
-computed_gender_file=${results_dir}'gender_computed.txt'
+computed_gender_file=${ax_results_dir}'gender_computed.txt'
 apt_geno=$(type -p apt-genotype-axiom)
 apt_summarize=$(type -p apt-probeset-summarize)
 
@@ -68,22 +95,21 @@ minsnp=3
 lastchr=31
 
 ############ For main HMM file
-hmm1="/usr/local/src/PennCNV-1.0.4/lib/hhall.hmm"
-log_file1=hmm1.minsnp_"$minsnp".log
-raw_file1=hmm1.minsnp_"$minsnp".rawcnv
-qc_log_file1=hmm1_minsnp_"$minsnp".log
+
+log_file1=penncnv_hmm1.minsnp_"$minsnp".log
+raw_file1=penncnv_hmm1.minsnp_"$minsnp".rawcnv
+qc_log_file1=penncnv_hmm1_minsnp_"$minsnp".log
 qclrrsd1=0.3
-qc_passout1=hmm1_minsnp_"$minsnp".qcpass
-qc_sumout1=hmm1_minsnp_"$minsnp".qcsum
-qc_goodcnv1=hmm1_minsnp_"$minsnp".goodcnv
+qc_passout1=penncnv_hmm1_minsnp_"$minsnp".qcpass
+qc_sumout1=penncnv_hmm1_minsnp_"$minsnp".qcsum
+qc_goodcnv1=penncnv_hmm1_minsnp_"$minsnp".goodcnv
 
 ##############################################################
 # Output files:
 ##############################################################
 
-pfb_file=${prj_prefix}".pfb"
 gc_file_model=${prj_prefix}".gcmodel"
-signal_outdir="PennCNV_run1/"
+signal_outdir=${prj_prefix}"_signals/"
 signal_outsuffix=".txt"
 signal_file_list="signal_fltr_files.txt"
 
@@ -92,7 +118,7 @@ signal_file_list="signal_fltr_files.txt"
 ###########################################
 
 [ -d ${ax_library_dir} ] ||  { echo "ERROR: Library directory not found"; exit 1; }
-[ -d ${cel_files_dir} ] || { echo "ERROR: CEL files directory not found"; exit 1; }
+[ -d ${ax_cel_dir} ] || { echo "ERROR: CEL files directory not found"; exit 1; }
 [ ! -z ${gen_cluster_exec} ] || { echo "ERROR: PennCNV scripts not found in PATH"; exit 1; }
 [ ! -z ${norm_cluster_exec} ] || { echo "ERROR: PennCNV scripts not found in PATH"; exit 1; }
 [ ! -z "${apt_geno}" ] || { echo "ERROR: APT Power Tools not found in PATH"; exit 1; }
@@ -105,21 +131,21 @@ signal_file_list="signal_fltr_files.txt"
 #
 # 1. Make a file containing a list of all CEL files + location
 #
-echo "cel_files" > $cel_list_file
-ls -d $cel_files_dir/*.CEL >> $cel_list_file
+echo "cel_files" > $ax_cel_file
+ls -d $ax_cel_dir/*.CEL >> $ax_cel_file
 
 #
 # 2. Generate genotyping calls from CEL files
 #  --summaries True  --console-add-select debug
 
-"$apt_geno" --cel-files ${cel_list_file} --analysis-files-path ${ax_library_dir} --arg-file ${ax_params_file} --summaries --dual-channel-normalization true --write-models --batch-folder ${ax_suite_dir} --log-file "apt-genotype-axiom.log"  --out-dir ${results_dir}
+"$apt_geno" --cel-files ${ax_cel_file} --analysis-files-path ${ax_library_dir} --arg-file ${ax_params_file} --summaries --dual-channel-normalization true --write-models --batch-folder ${ax_suite_dir} --log-file "apt-genotype-axiom.log"  --out-dir ${ax_results_dir}
 
 #
 # 3. Allele-specific signal extraction from CEL files
 #
 # The below will extract signal intensity values for PM probes in all the CEL files specified in the listfile. The values are then quantile normalized,  median polished, generating A & B signal intensity values for each SNP. The filehapmap.quant-norm.normalization-target.txt is is the reference quantile distribution.
 
-"$apt_summarize" --cel-files ${cel_list_file} --analysis "quant-norm.sketch=50000,pm-only,med-polish,expr.genotype=true" --target-sketch ${ax_sketch_file} --out-dir $results_dir -v 2 --cdf-file $ax_probeset_file
+"$apt_summarize" --cel-files ${ax_cel_file} --analysis "quant-norm.sketch=50000,pm-only,med-polish,expr.genotype=true" --target-sketch ${ax_sketch_file} --out-dir $ax_results_dir -v 2 --cdf-file $ax_probeset_file
 
 #
 # 4. create sex file from report
@@ -142,16 +168,21 @@ fgrep male ${ax_report_file} | cut -f 1,2 > ${computed_gender_file}
 # Compile PFB
 ##############################################
 
+# Create output directories
+#rm -frv $signal_outdir
+rm -fv $signal_file_list
+#mkdir $signal_outdir
+
 # No .pfb files? Use compile_pfb.pl
 # ls='ls -lkF --color=auto'
 echo "Creating signal file list"
 #unalias ls
-signal_files=$(ls -1 $signal_output_dir)
+signal_files=$(ls -1 $signal_outdir)
 echo "Created signal file list: $signal_files"
 
 # The output is a new file with directory/signal_file_name in each line
 for f in $signal_files; do
-	echo $signal_output_dir/$f >> $signal_file_list
+	echo $signal_outdir/$f >> $signal_file_list
 done
 
 # SNP_Map.txt from SNP_Map.zip in the Illumina raw files
@@ -179,4 +210,4 @@ echo "done compile PFB"
 #
 # Finally, we can extract allele-specific signal intensity measures to calculate the Log R Ratio (LRR) values and the B Allele Frequency (BAF) values for each marker in each individual. The cluster file gw6.genocluster is a file which specifies the chromosome position of each SNP or CN probe.
 
-# $perlexec $norm_cluster_exec ${genoclust} ${ax_qnpmpes_file} -locfile ${pfb_file} -out ${results_dir}.lrr_baf.txt
+# $perlexec $norm_cluster_exec ${genoclust} ${ax_qnpmpes_file} -locfile ${pfb_file} -out ${ax_results_dir}.lrr_baf.txt
