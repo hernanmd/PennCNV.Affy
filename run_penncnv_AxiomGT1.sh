@@ -67,6 +67,7 @@ ax_qnpmpes_file=${ax_results_dir}'quant-norm.pm-only.med-polish.expr.summary.txt
 ax_calls_file=${ax_results_dir}'AxiomGT1.calls.txt'
 ax_confs_file=${ax_results_dir}'AxiomGT1.confidences.txt'
 genoclust=${ax_results_dir}'AxiomGT1.genocluster'
+ax_penncnv_map=${ax_results_dir}"Axiom_GW_Bos_SNP_1.na35.annot.db-probemappings.txt"
 
 computed_gender_file=${ax_results_dir}'gender_computed.txt'
 apt_geno=$(type -p apt-genotype-axiom)
@@ -185,13 +186,10 @@ for f in $signal_files; do
 	echo $signal_outdir/$f >> $signal_file_list
 done
 
-# SNP_Map.txt from SNP_Map.zip in the Illumina raw files
 # The output is a .pfb file
 echo "About compiling PFB..."
-compile_pfb.pl \
-	--listfile $signal_file_list \
-	--snpposfile $snp_map \
-	--output $pfb_file
+echo ${signal_file_list}
+${perlexec} ${penncnv_root}compile_pfb.pl --listfile ${signal_file_list} --snpposfile ${ax_penncnv_map} --output ${pfb_file}
 echo "done compile PFB"
 
 
