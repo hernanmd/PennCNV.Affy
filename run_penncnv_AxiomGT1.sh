@@ -3,14 +3,23 @@
 #
 # Software & Library requirements
 #
-#	Put your .CEL files in a subdirectory of this script directory and edit the ax_cel_dir variable below.
+#	Put your .CEL files in a subdirectory of this script directory 
+#		Edit the ax_cel_dir variable below.
 #	If you are on Windows download and install ActivePerl: https://www.activestate.com/activeperl/downloads (required by PennCNV for Windows)
 # 	Install PennCNV software
 #		git clone https://github.com/WGLab/PennCNV.git
+#		Edit or check penncnv_root variable
 # 	Install Affymetrix Power Tools (APT) software 
-#		https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html & 
+#		https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html
 # 	Download Axiom Library files (CDFs) 
 #		https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-data-analysis/genechip-array-library-files.html
+#		Edit or check ax_library_root variable
+#		Edit or check ax_library_dir variable
+# 		Edit or check ax_params_file variable
+# 		Edit or check ax_sketch_file variable
+# 		Edit or check ax_probeset_file variable
+# 		Edit or check ax_annot_db variable
+# 		Edit or check ax_penncnv_map variable
 
 ###########################################
 # Input parameters
@@ -52,9 +61,10 @@ esac
 # Directory with .CEL files
 ax_cel_dir='004/'
 ax_cel_file=$(pwd)'cel_files_list.txt'
-ax_results_dir="output/"
+ax_results_dir="ax_output/"
 pfb_file=${prj_prefix}"_AxiomGT1.pfb"
 penncnv_hmm1=${penncnv_root}"lib/hhall.hmm"
+penncnv_results_dir="penncnv_output/"
 
 ax_library_dir=${ax_library_root}"Axiom_GW_Bos_SNP_1.r3/"
 ax_params_file=${ax_library_dir}'Axiom_GW_Bos_SNP_1_96orMore_Step1.r3.apt-probeset-genotype.AxiomGT1.apt2.xml'
@@ -66,6 +76,7 @@ ax_suite_dir=${ax_results_dir}'suitefiles'
 ax_qnpmpes_file=${ax_results_dir}'quant-norm.pm-only.med-polish.expr.summary.txt'
 ax_calls_file=${ax_results_dir}'AxiomGT1.calls.txt'
 ax_confs_file=${ax_results_dir}'AxiomGT1.confidences.txt'
+ax_apt_geno_log=${ax_results_dir}"apt-genotype-axiom.log"
 genoclust=${ax_results_dir}'AxiomGT1.genocluster'
 ax_penncnv_map=${ax_results_dir}"Axiom_GW_Bos_SNP_1.na35.annot.db-probemappings.txt"
 
@@ -85,6 +96,13 @@ fi
 gen_cluster_exec=$(type -p generate_affy_geno_cluster.pl)
 norm_cluster_exec=$(type -p normalize_affy_geno_cluster.pl)
 
+gc_file_prefix="gc5Base"
+gc_file=$gc_file_prefix".txt"
+gc_file_sorted=$gc_file_prefix"_equCab2_sorted.txt"
+gc_file_gz=$gc_file".gz"
+gc_file_url="http://hgdownload.cse.ucsc.edu/goldenPath/equCab2/database/"$gc_file_gz
+# For annotating with scan_region.pl
+refGeneUrl="http://hgdownload.soe.ucsc.edu/goldenPath/equCab2/database/refGene.txt.gz"
 
 ##############################################
 # PennCNV: Detect CNV parameters
@@ -137,9 +155,8 @@ ls -d $ax_cel_dir/*.CEL >> $ax_cel_file
 
 #
 # 2. Generate genotyping calls from CEL files
-#  --summaries True  --console-add-select debug
-
-"$apt_geno" --cel-files ${ax_cel_file} --analysis-files-path ${ax_library_dir} --arg-file ${ax_params_file} --summaries --dual-channel-normalization true --write-models --batch-folder ${ax_suite_dir} --log-file "apt-genotype-axiom.log"  --out-dir ${ax_results_dir}
+# 
+"$apt_geno" --cel-files ${ax_cel_file} --analysis-files-path ${ax_library_dir} --arg-file ${ax_params_file} --summaries --dual-channel-normalization true --write-models --batch-folder ${ax_suite_dir} --log-file ${ax_apt_geno_log}  --out-dir ${ax_results_dir}
 
 #
 # 3. Allele-specific signal extraction from CEL files
@@ -171,7 +188,7 @@ fgrep male ${ax_report_file} | cut -f 1,2 > ${computed_gender_file}
 
 # Create output directories
 #rm -frv $signal_outdir
-rm -fv $signal_file_list
+rm -fv ${signal_file_list}
 #mkdir $signal_outdir
 
 # No .pfb files? Use compile_pfb.pl
@@ -182,15 +199,22 @@ signal_files=$(ls -1 $signal_outdir)
 echo "Created signal file list: $signal_files"
 
 # The output is a new file with directory/signal_file_name in each line
-for f in $signal_files; do
-	echo $signal_outdir/$f >> $signal_file_list
+for f in ${signal_files}; do
+	echo ${signal_outdir}/${f} >> ${signal_file_list}
 done
 
 # The output is a .pfb file
 echo "About compiling PFB..."
-echo ${signal_file_list}
-${perlexec} ${penncnv_root}compile_pfb.pl --listfile ${signal_file_list} --snpposfile ${ax_penncnv_map} --output ${pfb_file}
+mkdir -p ${penncnv_results_dir}
+${perlexec} ${penncnv_root}compile_pfb.pl --listfile ${signal_file_list} --snpposfile ${ax_penncnv_map} --output ${penncnv_results_dir}/${pfb_file}
 echo "done compile PFB"
+
+##############################################
+# GC file
+##############################################
+
+# Download and sort GC file if not found
+[ -f $gc_file_sorted ] || { wget $gc_file_url; gunzip $gc_file_gz; sort -k 2,2 -k 3,3n < $gc_file > $gc_file_sorted; }
 
 
 #
