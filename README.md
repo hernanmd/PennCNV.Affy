@@ -19,16 +19,18 @@ The second script runs the PennCNV calculating LRR and BAF.
     - Linux/MacOS: Already installed.
     - Windows: Download and install ActivePerl: https://www.activestate.com/activeperl/downloads (required by PennCNV)
   - PennCNV: `git clone https://github.com/WGLab/PennCNV.git`
-  - (Affymetrix Power Tools (APT) software)[https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html]
+  - [Affymetrix Power Tools (APT) software](https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html)
   - UCSC utilities:
     - Linux: http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
     - MacOS: http://hgdownload.cse.ucsc.edu/admin/exe/macOSX.x86_64/
 	- Alternative download: `git clone https://github.com/ENCODE-DCC/kentUtils`
+	- Copy or move the downloaded commands to a PATH location:
+	  - `echo $PATH | tr \: \\n`
   - Clone this script: `git clone https://github.com/hernanmd/PennCNV.Affy.git`
 
 # Library Requirements
 
-  - Download Axiom Library files for your species (CDFs https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-data-analysis/genechip-array-library-files.html
+  - Download [Axiom Library files](https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-data-analysis/genechip-array-library-files.html) for your species (CDFs) 
     - Linux/MacOS : AAS Library files should be installed in /usr/local/src/AxiomAnalysisSuite/Library/
     - Windows: AAS Library files should be installed in c:\Users\Public\Documents\AxiomAnalysisSuite\Library\
       - Library files example names:
