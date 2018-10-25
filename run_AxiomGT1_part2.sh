@@ -39,7 +39,17 @@ fi
 gen_cluster_exec=$(type -p generate_affy_geno_cluster.pl)
 norm_cluster_exec=$(type -p normalize_affy_geno_cluster.pl)
 
+###########################################
+# Sanity checks
+###########################################
 
+echo -n "Sanity checks..."
+[ ! -z ${gen_cluster_exec} ] || { echo "ERROR: PennCNV scripts not found in PATH"; exit 1; }
+[ ! -z ${norm_cluster_exec} ] || { echo "ERROR: PennCNV scripts not found in PATH"; exit 1; }
+echo "done"
+
+ucsc_gen=1
+ax_penncnv_map=${ax_results_dir}"Axiom_GW_Bos_SNP_1.na35.annot.db-probemappings.txt"
 ax_qnpmpes_file=${ax_results_dir}'quant-norm.pm-only.med-polish.expr.summary.txt'
 ax_calls_file=${ax_results_dir}'AxiomGT1.calls.txt'
 ax_confs_file=${ax_results_dir}'AxiomGT1.confidences.txt'
@@ -133,23 +143,23 @@ echo "done cleaning PFB in :"${penncnv_results_dir}/${pfb_file_cleaned}
 # Obtain or generate GC model file
 ##############################################
 
-# Download and sort GC file if not found
-# [ -f $gc_file_sorted ] || { wget $gc_file_url; gunzip $gc_file_gz; sort -k 2,2 -k 3,3n < $gc_file > $gc_file_sorted; }
-
-# GC 5 Base = GC content per 5120bp
-bigWigToWig ${gc_bigWig} stdout | gzip -c > ${gc_file_prefix}.varStep.txt.gz
-wigEncode ${gc_file_prefix}.varStep.txt.gz ${gc_wig} ${gc_file_prefix}.wib
-
-# Add dummy column to the wiggle file.
-# See https://groups.google.com/a/soe.ucsc.edu/forum/?utm_medium=email&utm_source=footer#!topic/genome/2Jp8cGCsKBU for details
-mv ${gc_wig} ${gc_file_prefix}.tmp
-sed 's/^/2112\t/' ${gc_file_prefix}.tmp > ${gc_wig}
+if [ ${ucsc_gen} = true ]; then
+	# Download and sort GC file if not found
+	[ -f $gc_file_sorted ] || { wget $gc_file_url; gunzip $gc_file_gz; sort -k 2,2 -k 3,3n < $gc_file > $gc_file_sorted; }
+else
+	# GC 5 Base = GC content per 5120bp
+	bigWigToWig ${gc_bigWig} stdout | gzip -c > ${gc_file_prefix}.varStep.txt.gz
+	wigEncode ${gc_file_prefix}.varStep.txt.gz ${gc_wig} ${gc_file_prefix}.wib
+	# Add dummy column to the wiggle file.
+	# See https://groups.google.com/a/soe.ucsc.edu/forum/?utm_medium=email&utm_source=footer#!topic/genome/2Jp8cGCsKBU for details
+	mv ${gc_wig} ${gc_file_prefix}.tmp
+	sed 's/^/2112\t/' ${gc_file_prefix}.tmp > ${gc_wig}
+	gc_file_sorted=${gc_wig}
+fi
 
 # Make GC model
 echo "About creating GC Model..."
-cal_gc_snp.pl \
-	$gc_file_sorted ${pfb_file} \
-	-output $gc_file_model
+cal_gc_snp.pl ${gc_file_sorted} ${pfb_file} -output ${gc_file_model}
 echo "done"
 
 #

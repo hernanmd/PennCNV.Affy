@@ -28,7 +28,7 @@ case "$OSTYPE" in
 esac	
 
 # Directory with .CEL files
-ax_cel_dir='004/'
+ax_cel_dir='001/'
 ax_cel_file=$(pwd)'cel_files_list.txt'
 export ax_results_dir="ax_output/"
 
@@ -37,7 +37,7 @@ ax_params_file=${ax_library_dir}'Axiom_GW_Bos_SNP_1_96orMore_Step1.r3.apt-probes
 ax_sketch_file=${ax_library_dir}'Axiom_GW_Bos_SNP_1.r3.AxiomGT1.sketch'
 ax_probeset_file=${ax_library_dir}"Axiom_GW_Bos_SNP_1.r3.cdf"
 ax_annot_db==${ax_library_dir}'Axiom_GW_Bos_SNP_1.na35.annot.db'
-ax_penncnv_map=${ax_results_dir}"Axiom_GW_Bos_SNP_1.na35.annot.db-probemappings.txt"
+
 
 ax_report_file=${ax_results_dir}'AxiomGT1.report.txt'
 ax_suite_dir=${ax_results_dir}'suitefiles'
@@ -52,12 +52,12 @@ apt_summarize=$(type -p apt-probeset-summarize)
 # Sanity checks
 ###########################################
 
+echo -n "Sanity checks..."
 [ -d ${ax_library_dir} ] ||  { echo "ERROR: Library directory not found"; exit 1; }
 [ -d ${ax_cel_dir} ] || { echo "ERROR: CEL files directory not found"; exit 1; }
-[ ! -z ${gen_cluster_exec} ] || { echo "ERROR: PennCNV scripts not found in PATH"; exit 1; }
-[ ! -z ${norm_cluster_exec} ] || { echo "ERROR: PennCNV scripts not found in PATH"; exit 1; }
 [ ! -z "${apt_geno}" ] || { echo "ERROR: APT Power Tools not found in PATH"; exit 1; }
 [ ! -z "${apt_summarize}" ] || { echo "ERROR: APT Power Tools not found in PATH"; exit 1; }
+echo "done"
 
 ###########################################
 # Begin processing
@@ -66,13 +66,17 @@ apt_summarize=$(type -p apt-probeset-summarize)
 #
 # 1. Make a file containing a list of all CEL files + location
 #
+echo -n "Building CEL list file..."
 echo "cel_files" > $ax_cel_file
 ls -d $ax_cel_dir/*.CEL >> $ax_cel_file
+echo "done"
 
 #
 # 2. Generate genotyping calls from CEL files
 # 
+echo -n "Generate genotyping calls from CEL files..."
 "$apt_geno" --cel-files ${ax_cel_file} --analysis-files-path ${ax_library_dir} --arg-file ${ax_params_file} --summaries --dual-channel-normalization true --write-models --batch-folder ${ax_suite_dir} --log-file ${ax_apt_geno_log}  --out-dir ${ax_results_dir}
+echo "done"
 
 #
 # 3. Allele-specific signal extraction from CEL files
