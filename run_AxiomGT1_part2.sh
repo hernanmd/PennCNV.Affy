@@ -1,5 +1,5 @@
-#!/bin/sh
-# Author: Hernán Morales Durand <hernan.morales@gmail.com>	
+#!/bin/bash
+# Author: Hernán Morales Durand <hernan.morales@gmail.com>
 #
 
 # Uncomment to debug this script
@@ -17,14 +17,14 @@ case "$OSTYPE" in
 		PATH=$PATH:$penncnv_root:$penncnv_axdir
 		;;
 	msys*)
-		penncnv_root="/c/PennCNV/"	
+		penncnv_root="/c/PennCNV/"
 		penncnv_axdir=${penncnv_root}"affy/bin/"
-		PATH=$PATH:$penncnv_root:$penncnv_axdir:/c/Program\ Files/Thermo\ Fisher\ Scientific/Analysis\ Power\ Tools/APT-2.10.0/bin/		
+		PATH=$PATH:$penncnv_root:$penncnv_axdir:/c/Program\ Files/Thermo\ Fisher\ Scientific/Analysis\ Power\ Tools/APT-2.10.0/bin/
 		;;
 	*)
-		echo "unknown: $OSTYPE"
+		echo "unknown OS: $OSTYPE"
 		exit 1
-		;;			
+		;;
 esac
 
 ##############################################
@@ -46,9 +46,10 @@ norm_cluster_exec=$(type -p normalize_affy_geno_cluster.pl)
 echo -n "Sanity checks..."
 [ ! -z ${gen_cluster_exec} ] || { echo "ERROR: PennCNV scripts not found in PATH"; exit 1; }
 [ ! -z ${norm_cluster_exec} ] || { echo "ERROR: PennCNV scripts not found in PATH"; exit 1; }
+[ ! -z ${prj_prefix} ] || { echo "ERROR: Project name is empty. Set or source prj_prefix variable"; exit 1; }
 echo "done"
 
-ucsc_gen=1
+ucsc_gen=false
 ax_penncnv_map=${ax_results_dir}"Axiom_GW_Bos_SNP_1.na35.annot.db-probemappings.txt"
 ax_qnpmpes_file=${ax_results_dir}'quant-norm.pm-only.med-polish.expr.summary.txt'
 ax_calls_file=${ax_results_dir}'AxiomGT1.calls.txt'
@@ -67,10 +68,8 @@ gc_file_url="http://hgdownload.cse.ucsc.edu/goldenPath/loxAfr3/database/"$gc_fil
 gc_bigWig=${gc_file_prefix}".bw"
 gc_wig=${gc_file_prefix}".wig"
 
-
 # For annotating with scan_region.pl
 refGeneUrl="http://hgdownload.soe.ucsc.edu/goldenPath/equCab2/database/refGene.txt.gz"
-
 
 ##############################################################
 # Output files:
@@ -118,8 +117,9 @@ rm -fv ${signal_file_list}
 # No .pfb files? Use compile_pfb.pl
 # ls='ls -lkF --color=auto'
 echo "Creating signal file list"
-# ls is aliased? 
+# ls is aliased?
 #unalias ls
+[ -d ${signal_outdir} ] || { echo "ERROR: Signal output directory not found, it should be: ${signal_outdir}"; exit 1; }
 signal_files=$(ls -1 $signal_outdir)
 
 # The output is a new file with directory/signal_file_name in each line
@@ -143,18 +143,24 @@ echo "done cleaning PFB in :"${penncnv_results_dir}/${pfb_file_cleaned}
 # Obtain or generate GC model file
 ##############################################
 
+echo -n "Using UCSC generated GC file..."
 if [ ${ucsc_gen} = true ]; then
 	# Download and sort GC file if not found
+	echo "true"
 	[ -f $gc_file_sorted ] || { wget $gc_file_url; gunzip $gc_file_gz; sort -k 2,2 -k 3,3n < $gc_file > $gc_file_sorted; }
 else
+	echo "false"
 	# GC 5 Base = GC content per 5120bp
+	echo -n "Generating wig/wib file..."
 	bigWigToWig ${gc_bigWig} stdout | gzip -c > ${gc_file_prefix}.varStep.txt.gz
 	wigEncode ${gc_file_prefix}.varStep.txt.gz ${gc_wig} ${gc_file_prefix}.wib
-	# Add dummy column to the wiggle file.
+	echo "done."
+	echo -n "Adding dummy column to the wiggle file..."
 	# See https://groups.google.com/a/soe.ucsc.edu/forum/?utm_medium=email&utm_source=footer#!topic/genome/2Jp8cGCsKBU for details
 	mv ${gc_wig} ${gc_file_prefix}.tmp
 	sed 's/^/2112\t/' ${gc_file_prefix}.tmp > ${gc_wig}
 	gc_file_sorted=${gc_wig}
+	echo "done"
 fi
 
 # Make GC model

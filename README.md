@@ -13,12 +13,13 @@ The second script runs the PennCNV calculating LRR and BAF.
 # Software Requirements
 
   - Git
-    - Linux/MacOS: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
-	- Windows: GitBash https://git-scm.com/download/win
+    - [Git for Linux/MacOS](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+    - [Git for Windows (GitBash)](https://git-scm.com/download/win)
   - Perl
     - Linux/MacOS: Already installed.
-    - Windows: Download and install ActivePerl: https://www.activestate.com/activeperl/downloads (required by PennCNV)
+    - Windows: Download and install [ActivePerl](https://www.activestate.com/activeperl/downloads) (required by PennCNV)
   - PennCNV: `git clone https://github.com/WGLab/PennCNV.git`
+    - Copy Affymetrix required binaries to an accessible location: `cp PennCNV/affy/bin/* /usr/local/bin/`
   - [Affymetrix Power Tools (APT) software](https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html)
   - UCSC utilities:
     - Linux: http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
@@ -37,7 +38,9 @@ The second script runs the PennCNV calculating LRR and BAF.
       - 'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_Buffalo_Analysis-r2'
       - 'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_GW_GT_Chicken_Analysis-r2'
       - 'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_OviCap_Analysis-caprine-r1'
-      - 'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_MouseHD_Analysis.r1'  
+      - 'c:\Users\Public\Documents\AxiomAnalysisSuite\Library\Axiom_MouseHD_Analysis.r1'
+  - Download [Array Annotation Files](https://www.thermofisher.com/ar/en/home/life-science/microarray-analysis/microarray-data-analysis/genechip-array-annotation-files.html) for your species.
+    
 	
 # Script configuration
 	
@@ -76,3 +79,7 @@ cd PennCNV.Affy
 ```bash
 ./run_AxiomGT1_part2.sh
 ```
+
+  - If you wish to run the second script isolated from the first one, you should set up the project name and Axiom output directory in command line:
+    - `export ax_results_dir="ax_output/"`
+    - `export export prj_prefix="Run1"`
