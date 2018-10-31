@@ -1,5 +1,5 @@
 #!/bin/sh
-# Author: Hernán Morales Durand <hernan.morales@gmail.com>	
+# Author: Hernán Morales Durand <hernan.morales@gmail.com>
 
 # Uncomment to debug this script
 #set -x
@@ -19,13 +19,13 @@ case "$OSTYPE" in
 		;;
 	msys*)
 		ax_library_root="/c/Users/Public/Documents/AxiomAnalysisSuite/Library/"
-		PATH=$PATH:$penncnv_root:$penncnv_axdir:/c/Program\ Files/Thermo\ Fisher\ Scientific/Analysis\ Power\ Tools/APT-2.10.0/bin/		
+		PATH=$PATH:$penncnv_root:$penncnv_axdir:/c/Program\ Files/Thermo\ Fisher\ Scientific/Analysis\ Power\ Tools/APT-2.10.0/bin/
 		;;
 	*)
 		echo "unknown: $OSTYPE"
 		exit 1
-		;;			
-esac	
+		;;
+esac
 
 # Directory with .CEL files
 ax_cel_dir='001/'
@@ -42,7 +42,6 @@ ax_annot_db==${ax_library_dir}'Axiom_GW_Bos_SNP_1.na35.annot.db'
 ax_report_file=${ax_results_dir}'AxiomGT1.report.txt'
 ax_suite_dir=${ax_results_dir}'suitefiles'
 ax_apt_geno_log=${ax_results_dir}"apt-genotype-axiom.log"
-genoclust=${ax_results_dir}'AxiomGT1.genocluster'
 
 computed_gender_file=${ax_results_dir}'gender_computed.txt'
 apt_geno=$(type -p apt-genotype-axiom)
