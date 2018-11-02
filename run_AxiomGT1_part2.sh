@@ -99,6 +99,7 @@ penncnv_results_dir="penncnv_output"
 pfb_file=${penncnv_results_dir}/${prj_prefix}"_AxiomGT1.pfb"
 pfb_file_cleaned=${penncnv_results_dir}/${prj_prefix}"_AxiomGT1.cleaned.pfb"
 penncnv_hmm1=${penncnv_root}"lib/hhall.hmm"
+# Output gender file
 cleaned_gf="clean_gender_file.txt"
 
 # Call CNVs containing more than or equal to 3 SNPs
@@ -116,25 +117,20 @@ qc_passout1=penncnv_hmm1_minsnp_"$minsnp".qcpass
 qc_sumout1=penncnv_hmm1_minsnp_"$minsnp".qcsum
 qc_goodcnv1=penncnv_hmm1_minsnp_"$minsnp".goodcnv
 
-
 ##############################################
 # Compile PFB
 ##############################################
-
-# Clean previous run and create output directories
-rm -frv $signal_outdir
-rm -fv ${signal_file_list}
-mkdir $signal_outdir
 
 # No .pfb files? Use compile_pfb.pl
 # ls='ls -lkF --color=auto'
 echo "Creating signal file list"
 # ls is aliased?
 #unalias ls
-[ -d ${signal_outdir} ] || { echo "ERROR: Signal output directory not found, it should be: ${signal_outdir}"; exit 1; }
+[ -d ${signal_outdir} ] || { echo "ERROR: Signal output directory not found, it should be: ${signal_outdir} and contain .penncnv.cnv.txt files"; exit 1; }
 signal_files=$(ls -1 $signal_outdir)
 
-# The output is a new file with directory/signal_file_name in each line
+# The output is a new file with directory/signal_file_name in each line# Clean previous run and create output directories
+rm -fv ${signal_file_list}
 for f in ${signal_files}; do
 	echo ${signal_outdir}/${f} >> ${signal_file_list}
 done
@@ -193,7 +189,7 @@ echo "done."
 
 echo -n "About to generate canonical genotype clustering file"
 # Remove header lines produced by Affymetrix
-if [ $(head -c 2 ${computed_gender_file}) = "#%" ]; then
+if [[ $(head -c 2 ${computed_gender_file}) == "#%" ]]; then
 	tail -n +3 ${computed_gender_file} > ${cleaned_gf}
 else
 	computed_gender_file=${cleaned_gf}
@@ -206,4 +202,4 @@ echo "done."
 #
 # Finally, we can extract allele-specific signal intensity measures to calculate the Log R Ratio (LRR) values and the B Allele Frequency (BAF) values for each marker in each individual. The cluster file gw6.genocluster is a file which specifies the chromosome position of each SNP or CN probe.
 
-# $perlexec $norm_cluster_exec ${genoclust} ${ax_qnpmpes_file} -locfile ${pfb_file} -out ${ax_results_dir}.lrr_baf.txt
+$perlexec $norm_cluster_exec ${genoclust} ${ax_qnpmpes_file} -locfile ${pfb_file_cleaned} -out ${ax_results_dir}.lrr_baf.txt

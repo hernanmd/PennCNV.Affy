@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 # Author: Hernán Morales Durand <hernan.morales@gmail.com>
 
 # Uncomment to debug this script
-#set -x
+set -x
 
 ###########################################
 # Input parameters
