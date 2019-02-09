@@ -13,11 +13,9 @@ The second script runs the PennCNV calculating LRR and BAF.
 # Software Requirements
 
   - Git
-    - [Git for Linux/MacOS](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-    - [Git for Windows (GitBash)](https://git-scm.com/download/win)
-  - Perl
-    - Linux/MacOS: Already installed.
-    - Windows: Download and install [ActivePerl](https://www.activestate.com/activeperl/downloads) (required by PennCNV)
+    - Linux: [Git for Linux/MacOS](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+    - Windows: [MSYS2](https://www.msys2.org/): `pacman -Syu; exit`
+      - `pacman -S git`
   - PennCNV: `git clone https://github.com/WGLab/PennCNV.git`
     - Copy Affymetrix required binaries to an accessible location: `cp PennCNV/affy/bin/* /usr/local/bin/`
   - [Affymetrix Power Tools (APT) software](https://www.thermofisher.com/ar/es/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html)
