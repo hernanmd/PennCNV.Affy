@@ -4,7 +4,7 @@ Workflow for running PennCNV with Affymetrix platform files
 
 # Introduction
 
-The workflow requires to open and edit the script files to customize the variables for your environment and species. 
+The workflow requires to open and edit the script files to customize the variables for your environment and species.
 
 The first script runs the Affymetrix Power Tools command-line programs to generate genotyping calls from CEL files, and extract signal intensity values for PM probes in all the CEL files, the values are then quantile normalized, median polished, generating A & B signal intensity values for each SNP.
 
@@ -43,27 +43,29 @@ The second script runs the PennCNV calculating LRR and BAF.
 
 # Download
 
-  - Open a Git console and execute the following commands: 
+  - Open a Git console and execute the following commands:
 
 ```bash
 git clone https://github.com/hernanmd/PennCNV.Affy.git
 cd PennCNV.Affy
 ```
-	
+
 # Configuration
 
-  - Put your .CEL files in a subdirectory of this script directory 
-  - Edit the ax_cel_dir variable with the subdirectory name in Project.config file.
-  - prj_prefix = Prefix of output files	
+  - Put your .CEL files in a subdirectory of this script directory
+  - Edit the ax_cel_dir variable with the subdirectory name in Project.config file. ```nano Project.config```
+  - prj_prefix = Prefix of output files
 
 # Optional configuration
 
-  - Edit or check the following variables: 
-    - penncnv_root = Directory with PennCNV binaries
-    - ax_library_root = Parent directory of Axiom Libraries
+  - Edit or check the following variables:
+    - penncnv_root = Directory with PennCNV binaries: ```nano penncnv_root.sh```
+    - ax_library_root = Parent directory of Axiom Libraries. ```nano ax_lib_root.sh```
     - ax_library_dir = Directory of Axiom Library files for your species (see above Library Requirements)
-    - ax_params_file = XML file parameters, ex: Axiom_GW_Bos_SNP_1_96orMore_Step1.r3.apt-probeset-genotype.AxiomGT1.apt2.xml
-    - ax_sketch_file = Axiom sketch file: Axiom_GW_Bos_SNP_1.r3.AxiomGT1.sketch
+    - ax_params_file = XML file parameters.
+      - example: Axiom_GW_Bos_SNP_1_96orMore_Step1.r3.apt-probeset-genotype.AxiomGT1.apt2.xml
+    - ax_sketch_file = Axiom sketch file.
+      - example: Axiom_GW_Bos_SNP_1.r3.AxiomGT1.sketch
     - ax_probeset_file = Axiom CDF file
     - ax_annot_db = SQLite annotation database file (.annot.db)
     - ax_penncnv_map = Axiom probe mappings file (.annot.db-probemappings.txt)
